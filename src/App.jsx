@@ -1,9 +1,7 @@
-const App = props => {
-	return (
-		<>
-			<h1>App</h1>
-		</>
-	);
+import AppRouter from './router/AppRouter';
+
+const App = () => {
+	return <AppRouter />;
 };
 
 export default App;
