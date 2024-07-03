@@ -1,5 +1,7 @@
+import AuthLayout from '../layout/AuthLayout';
+
 const RegisterPage = () => {
-	return <div>RegisterPage</div>;
+	return <AuthLayout title='Register'></AuthLayout>;
 };
 
 export default RegisterPage;
