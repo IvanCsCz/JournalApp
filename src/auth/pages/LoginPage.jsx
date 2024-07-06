@@ -1,18 +1,25 @@
 import { Google } from '@mui/icons-material';
-import { Button, Grid, Link, TextField, Typography } from '@mui/material';
-import { useMemo } from 'react';
+import {
+	Alert,
+	Button,
+	Grid,
+	Link,
+	TextField,
+	Typography
+} from '@mui/material';
+import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import { useForm } from '../../hooks/useForm';
 import {
-	checkingAunthentication,
-	startGoogleSignIn
+	startGoogleSignIn,
+	startLoginWithEmailPassword
 } from '../../store/auth/thunks';
 import AuthLayout from '../layout/AuthLayout';
 
 const formData = {
-	email: 'testing@google.com',
-	password: '1234'
+	email: '',
+	password: ''
 };
 
 const formValidations = {
@@ -25,19 +32,30 @@ const formValidations = {
 
 const LoginPage = () => {
 	const dispatch = useDispatch();
-	const { status } = useSelector(state => state.auth);
-	const { email, password, onInputChange } = useForm(formData, formValidations);
+	const [formSubmitted, setFormSubmitted] = useState(false);
+	const { status, errorMessage } = useSelector(state => state.auth);
+	const {
+		formState,
+		isFormValid,
+		emailValid,
+		passwordValid,
+		email,
+		password,
+		onInputChange
+	} = useForm(formData, formValidations);
 
 	const idAuthenticating = useMemo(() => status === 'checking', [status]);
 
 	const onSubmit = ev => {
 		ev.preventDefault();
+		setFormSubmitted(true);
 
-		dispatch(checkingAunthentication());
+		if (!isFormValid) return;
+
+		dispatch(startLoginWithEmailPassword(formState));
 	};
 
 	const onGoogleSignIn = () => {
-		console.log('onGoogleSignIn');
 		dispatch(startGoogleSignIn());
 	};
 
@@ -53,6 +71,8 @@ const LoginPage = () => {
 							name='email'
 							value={email}
 							onChange={onInputChange}
+							error={!!emailValid && formSubmitted}
+							helperText={emailValid}
 							fullWidth
 						/>
 					</Grid>
@@ -65,11 +85,17 @@ const LoginPage = () => {
 							name='password'
 							value={password}
 							onChange={onInputChange}
+							error={!!passwordValid && formSubmitted}
+							helperText={passwordValid}
 							fullWidth
 						/>
 					</Grid>
 
 					<Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
+						<Grid item xs={12} sm={12} display={errorMessage ? '' : 'none'}>
+							<Alert severity='error'>{errorMessage}</Alert>
+						</Grid>
+
 						<Grid item xs={12} sm={6}>
 							<Button
 								type='submit'
